@@ -30,15 +30,15 @@ Tài liệu này hướng dẫn chi tiết cách cài đặt Oracle Exadata Stor
 
 | Cell Name | Public IP | Private IP (Interconnect) | Hostname |
 |-----------|-----------|---------------------------|----------|
-| exacell01 | 192.168.56.61 | 192.168.2.61 | exacell01.localdomain |
-| exacell02 | 192.168.56.62 | 192.168.2.62 | exacell02.localdomain |
-| exacell03 | 192.168.56.63 | 192.168.2.63 | exacell03.localdomain |
-| exacell04 | 192.168.56.64 | 192.168.2.64 | exacell04.localdomain |
-| exacell05 | 192.168.56.65 | 192.168.2.65 | exacell05.localdomain |
+| exacell01 | 192.168.10.100 | 192.168.11.100 | exacell01.localdomain |
+| exacell02 | 192.168.10.101 | 192.168.11.101 | exacell02.localdomain |
+| exacell03 | 192.168.10.102 | 192.168.11.102 | exacell03.localdomain |
+| exacell04 | 192.168.10.103 | 192.168.11.103 | exacell04.localdomain |
+| exacell05 | 192.168.10.104 | 192.168.11.104 | exacell05.localdomain |
 
 **Network Adapters:**
-- **eth0:** Public Network (192.168.56.0/24) - Host-only hoặc NAT
-- **eth1:** Private Network (192.168.2.0/24) - Internal Network
+- **eth0:** Public Network (192.168.10.0/24) - Host-only hoặc NAT
+- **eth1:** Private Network (192.168.11.0/24) - Internal Network
 
 ## Phần II: Cài đặt và cấu hình Cell Node Master (exacell01)
 
@@ -52,18 +52,18 @@ Tài liệu này hướng dẫn chi tiết cách cài đặt Oracle Exadata Stor
 #::1 localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 # Cell Nodes - Public Network
-192.168.56.61 exacell01.localdomain exacell01
-192.168.56.62 exacell02.localdomain exacell02
-192.168.56.63 exacell03.localdomain exacell03
-192.168.56.64 exacell04.localdomain exacell04
-192.168.56.65 exacell05.localdomain exacell05
+192.168.10.100 exacell01.localdomain exacell01
+192.168.10.101 exacell02.localdomain exacell02
+192.168.10.102 exacell03.localdomain exacell03
+192.168.10.103 exacell04.localdomain exacell04
+192.168.10.104 exacell05.localdomain exacell05
 
 # Cell Nodes - Private Network (Interconnect)
-192.168.2.61 exacell01-ib.localdomain exacell01-ib
-192.168.2.62 exacell02-ib.localdomain exacell02-ib
-192.168.2.63 exacell03-ib.localdomain exacell03-ib
-192.168.2.64 exacell04-ib.localdomain exacell04-ib
-192.168.2.65 exacell05-ib.localdomain exacell05-ib
+192.168.11.100 exacell01-priv.localdomain exacell01-priv
+192.168.11.101 exacell02-priv.localdomain exacell02-priv
+192.168.11.102 exacell03-priv.localdomain exacell03-priv
+192.168.11.103 exacell04-priv.localdomain exacell04-priv
+192.168.11.104 exacell05-priv.localdomain exacell05-priv
 ```
 
 #### 1.2 Cấu hình kernel parameters cho version 12.1.1.1.0
@@ -458,8 +458,8 @@ hostnamectl set-hostname ${CELL_NAME}.localdomain
 echo "HOSTNAME=${CELL_NAME}.localdomain" > /etc/sysconfig/network
 
 # Cập nhật IP address trong network config files (nếu cần)
-PRIVATE_IP="192.168.2.6${CELL_NUM}"
-sed -i "s/192\.168\.2\.61/$PRIVATE_IP/g" /etc/sysconfig/network-scripts/ifcfg-eth1
+PRIVATE_IP="192.168.11.10${CELL_NUM}"
+sed -i "s/192\.168\.11\.100/$PRIVATE_IP/g" /etc/sysconfig/network-scripts/ifcfg-eth1
 
 # Xóa symbolic links cũ
 cd /opt/oracle/cell12.1.1.1.0_LINUX.X64_131219/disks/raw
@@ -484,7 +484,7 @@ echo "Please reboot and configure cell services manually"
 
 **Cho exacell02:**
 ```bash
-[root@exacell02 ~]# ./configure_cell.sh exacell02 02
+[root@exacell02 ~]# ./configure_cell.sh exacell02 01
 
 # Sau khi reboot
 [root@exacell02 ~]# su - celladmin
@@ -495,7 +495,7 @@ echo "Please reboot and configure cell services manually"
 
 **Cho exacell03:**
 ```bash
-[root@exacell03 ~]# ./configure_cell.sh exacell03 03
+[root@exacell03 ~]# ./configure_cell.sh exacell03 02
 
 # Sau khi reboot
 [root@exacell03 ~]# su - celladmin
@@ -506,7 +506,7 @@ echo "Please reboot and configure cell services manually"
 
 **Cho exacell04:**
 ```bash
-[root@exacell04 ~]# ./configure_cell.sh exacell04 04
+[root@exacell04 ~]# ./configure_cell.sh exacell04 03
 
 # Sau khi reboot
 [root@exacell04 ~]# su - celladmin
@@ -517,7 +517,7 @@ echo "Please reboot and configure cell services manually"
 
 **Cho exacell05:**
 ```bash
-[root@exacell05 ~]# ./configure_cell.sh exacell05 05
+[root@exacell05 ~]# ./configure_cell.sh exacell05 04
 
 # Sau khi reboot
 [root@exacell05 ~]# su - celladmin
@@ -1007,11 +1007,11 @@ echo "Total size: $(du -sh $BACKUP_DIR | cut -f1)"
 
 ```bash
 # /etc/oracle/cell/network-config/cellip.ora
-cell="192.168.2.61"
-cell="192.168.2.62" 
-cell="192.168.2.63"
-cell="192.168.2.64"
-cell="192.168.2.65"
+cell="192.168.11.100"
+cell="192.168.11.101" 
+cell="192.168.11.102"
+cell="192.168.11.103"
+cell="192.168.11.104"
 ```
 
 #### File cellinit.ora cho Database Server
@@ -1019,7 +1019,7 @@ cell="192.168.2.65"
 ```bash
 # /etc/oracle/cell/network-config/cellinit.ora
 # Cell Initialization Parameters for 12.1.1.1.0
-ipaddress1=192.168.2.80/24
+ipaddress1=192.168.11.200/24
 _cell_print_all_params=true
 _skgxp_gen_rpc_timeout_in_sec=90
 _skgxp_gen_ant_off_rpc_timeout_in_sec=300
@@ -1037,7 +1037,7 @@ _asm_allow_only_raw_disks=false
 #!/bin/bash
 # test_db_cell_connectivity.sh
 
-CELLS=("192.168.2.61" "192.168.2.62" "192.168.2.63" "192.168.2.64" "192.168.2.65")
+CELLS=("192.168.11.100" "192.168.11.101" "192.168.11.102" "192.168.11.103" "192.168.11.104")
 
 echo "=== Testing DB Server to Cell Connectivity ==="
 
@@ -1102,9 +1102,9 @@ done
 **Kiểm tra:**
 ```bash
 # Kiểm tra IP conflicts
-for i in {1..5}; do
-    ping -c 1 192.168.2.6$i
-    ping -c 1 192.168.56.6$i
+for i in {0..4}; do
+    ping -c 1 192.168.11.10$i
+    ping -c 1 192.168.10.10$i
 done
 ```
 
@@ -1723,6 +1723,8 @@ echo "Restore: $BACKUP_DIR/restore_all_cells.sh"
 
 **🎯 Cấu hình hoàn chỉnh:**
 - **5 Cell Nodes:** exacell01 → exacell05
+- **Public Network:** 192.168.10.100-104/24
+- **Private Network:** 192.168.11.100-104/24
 - **Software Version:** Oracle Storage Server 12.1.1.1.0
 - **Total Storage:** 90 Hard Disks (18 per cell × 5 cells)
 - **Flash Storage:** 30 Flash Disks (6 per cell × 5 cells)
